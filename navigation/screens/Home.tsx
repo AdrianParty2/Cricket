@@ -1,4 +1,4 @@
-import { Button, Text } from '@react-navigation/elements';
+import { Text } from 'react-native';
 import { StyleSheet, View } from 'react-native';
 
 export function HomeScreen() {
