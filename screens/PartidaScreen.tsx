@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, ScrollView, useColorScheme, Animated } from 'react-native';
+import { View, Text, StyleSheet, Alert, ScrollView, useColorScheme, Animated, Dimensions } from 'react-native';
 import { Button, ButtonText } from "@gluestack-ui/themed";
 import { Player, GameState, initializePlayer, isNumberLocked, isNumberLockedForPlayer, updatePlayerScore } from '../utils/gameTypes';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const BUTTON_SIZE = Math.min(SCREEN_WIDTH * 0.25, 80); // 25% del ancho de pantalla o máximo 80
+const LARGE_BUTTON_SIZE = Math.min(SCREEN_WIDTH * 0.35, 100); // 35% del ancho de pantalla o máximo 100
 
 export default function PartidaScreen({ route, navigation }) {
   const { players: initialPlayers } = route.params;
@@ -204,7 +208,7 @@ export default function PartidaScreen({ route, navigation }) {
     <View style={[styles.container, isDark && styles.darkContainer]}>
       <View style={[styles.header, isDark && styles.darkHeader]}>
         <Text style={[styles.roundText, isDark && styles.darkText]}>Ronda: {gameState.currentRound}/20</Text>
-        <Text style={[styles.playerText, isDark && styles.darkText]}>Jugador: {currentPlayer.name}</Text>
+        <Text style={[styles.playerText, isDark && styles.darkText]}>Jugador: <Text style={{fontWeight: 'bold'}}>{currentPlayer.name}</Text></Text>
         <Text style={[styles.throwText, isDark && styles.darkText]}>Tirada: {gameState.currentThrow}/3</Text>
       </View>
 
@@ -254,15 +258,15 @@ export default function PartidaScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: SCREEN_WIDTH * 0.05, // 5% del ancho de la pantalla
     backgroundColor: '#F5FCFF',
   },
   darkContainer: {
     backgroundColor: '#1a1a1a',
   },
   header: {
-    marginBottom: 20,
-    padding: 20,
+    marginBottom: SCREEN_HEIGHT * 0.02,
+    padding: SCREEN_WIDTH * 0.04,
     backgroundColor: '#fff',
     borderRadius: 16,
     shadowColor: '#000',
@@ -275,18 +279,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#2d2d2d',
   },
   roundText: {
-    fontSize: 20,
+    fontSize: Math.min(SCREEN_WIDTH * 0.05, 20),
     fontWeight: 'bold',
     marginBottom: 8,
     color: '#1a1a1a',
   },
   playerText: {
-    fontSize: 18,
+    fontSize: Math.min(SCREEN_WIDTH * 0.045, 18),
     marginBottom: 8,
     color: '#1a1a1a',
   },
   throwText: {
-    fontSize: 18,
+    fontSize: Math.min(SCREEN_WIDTH * 0.045, 18),
     marginBottom: 8,
     color: '#1a1a1a',
   },
@@ -294,18 +298,19 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   buttonsContainer: {
-    marginBottom: 20,
+    marginBottom: SCREEN_HEIGHT * 0.02,
+    paddingHorizontal: SCREEN_WIDTH * 0.02,
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 24,
-    paddingHorizontal: 10,
+    marginBottom: SCREEN_HEIGHT * 0.02,
+    alignItems: 'center',
   },
   numberButton: {
-    width: '30%',
-    height: 70,
-    borderRadius: 16,
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
+    borderRadius: BUTTON_SIZE * 0.2,
     backgroundColor: '#007AFF',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -316,21 +321,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   largeButton: {
-    width: '45%',
-    height: 80,
+    width: LARGE_BUTTON_SIZE,
+    height: LARGE_BUTTON_SIZE,
   },
   lockedButton: {
     opacity: 0.7,
     backgroundColor: '#ccc',
   },
   buttonText: {
-    fontSize: 24,
+    fontSize: Math.min(SCREEN_WIDTH * 0.06, 24),
     fontWeight: 'bold',
-    textAlignVertical: 'center',
     color: '#fff',
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
   largeButtonText: {
-    fontSize: 28,
+    fontSize: Math.min(SCREEN_WIDTH * 0.07, 28),
   },
   lockedButtonText: {
     color: '#666',
@@ -344,16 +350,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
+    marginTop: SCREEN_HEIGHT * 0.02,
   },
   darkScoresContainer: {
     backgroundColor: '#2d2d2d',
   },
   scoresContent: {
-    padding: 20,
+    padding: SCREEN_WIDTH * 0.04,
   },
   playerScoreContainer: {
-    marginBottom: 16,
-    padding: 16,
+    marginBottom: SCREEN_HEIGHT * 0.02,
+    padding: SCREEN_WIDTH * 0.04,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
@@ -361,13 +368,13 @@ const styles = StyleSheet.create({
     borderBottomColor: '#444',
   },
   playerName: {
-    fontSize: 18,
+    fontSize: Math.min(SCREEN_WIDTH * 0.045, 18),
     fontWeight: 'bold',
     marginBottom: 4,
     color: '#1a1a1a',
   },
   scoreText: {
-    fontSize: 16,
+    fontSize: Math.min(SCREEN_WIDTH * 0.04, 16),
     color: '#666',
     marginBottom: 8,
   },
@@ -377,12 +384,12 @@ const styles = StyleSheet.create({
   numbersStatus: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: SCREEN_WIDTH * 0.02,
   },
   numberStatusContainer: {
     backgroundColor: '#E3F2FD',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: SCREEN_WIDTH * 0.03,
+    paddingVertical: SCREEN_HEIGHT * 0.01,
     borderRadius: 8,
     marginRight: 4,
     marginBottom: 4,
@@ -391,13 +398,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-    minWidth: 80,
+    minWidth: SCREEN_WIDTH * 0.2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   lockedNumberStatus: {
     backgroundColor: '#E8F5E9',
   },
   numberStatusText: {
-    fontSize: 14,
+    fontSize: Math.min(SCREEN_WIDTH * 0.035, 14),
     color: '#1976D2',
     fontWeight: '500',
     textAlign: 'center',

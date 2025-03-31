@@ -87,6 +87,7 @@ export default function HomeScreen() {
                     value={playerNames[`player${index}`] || ''}
                     onChangeText={(text) => handleNameChange(index, text)}
                     style={[styles.input, isDark && styles.darkInput]}
+                    onSubmitEditing={handleAddPlayer}
                   />
                 </Input>
                 {players.length > 1 && (
@@ -101,25 +102,27 @@ export default function HomeScreen() {
             ))}
             
             {players.length < 4 && (
-              <Button
-                size="lg"
-                variant="outline"
-                onPress={handleAddPlayer}
-                style={styles.addButton}
-              >
-                <Plus size={20} style={styles.addIcon} />
-                <ButtonText>Añadir Jugador</ButtonText>
-              </Button>
+            <Button
+            size="lg"
+            variant="outline"
+            onPress={handleAddPlayer}
+            style={styles.addButton}
+          >
+            <View style={styles.buttonContent}>
+              <Plus size={20} style={styles.addIcon} />
+              <ButtonText style={styles.addButtonText}>Añadir Jugador</ButtonText>
+            </View>
+          </Button>
             )}
           </View>
 
           <Button
-            size="lg"
-            onPress={handleStartGame}
-            style={styles.startButton}
-          >
-            <ButtonText style={styles.startButtonText}>Iniciar Partida</ButtonText>
-          </Button>
+  size="lg"
+  onPress={handleStartGame}
+  style={styles.startButton}
+>
+  <ButtonText style={styles.startButtonText}>Iniciar Partida</ButtonText>
+</Button>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -127,97 +130,115 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  darkContainer: {
-    backgroundColor: '#1a1a1a',
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    maxWidth: 600,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  title: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 40,
-    color: '#1a1a1a',
-    letterSpacing: 1,
-  },
-  darkText: {
-    color: '#fff',
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 20,
-    color: '#1a1a1a',
-  },
-  playersContainer: {
-    width: '100%',
-    marginBottom: 40,
-  },
-  playerRow: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    alignItems: 'center',
-    gap: 12,
-  },
-  input: {
-    height: 56,
-    fontSize: 16,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-  },
-  darkInput: {
-    backgroundColor: '#2d2d2d',
-    color: '#fff',
-  },
-  removeButton: {
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: '#f5f5f5',
-  },
-  darkRemoveButton: {
-    backgroundColor: '#2d2d2d',
-  },
-  addButton: {
-    marginTop: 16,
-    borderColor: '#007AFF',
-    borderRadius: 12,
-    height: 56,
-  },
-  addIcon: {
-    marginRight: 8,
-  },
-  startButton: {
-    width: '100%',
-    height: 64,
-    backgroundColor: '#007AFF',
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
+    container: {
+      flex: 1,
+      backgroundColor: '#fff',
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  startButtonText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#fff',
-    textAlign: 'center',
-  },
-});
+    darkContainer: {
+      backgroundColor: '#1a1a1a',
+    },
+    scrollContent: {
+      flexGrow: 1,
+      padding: 20,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
+      maxWidth: 600,
+      width: '100%',
+      alignSelf: 'center',
+    },
+    title: {
+      fontSize: 40,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginBottom: 40,
+      color: '#1a1a1a',
+      letterSpacing: 1,
+    },
+    darkText: {
+      color: '#fff',
+    },
+    subtitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      marginBottom: 20,
+      color: '#1a1a1a',
+    },
+    playersContainer: {
+      width: '100%',
+      marginBottom: 40,
+    },
+    playerRow: {
+      flexDirection: 'row',
+      marginBottom: 16,
+      alignItems: 'center',
+      gap: 12,
+    },
+    input: {
+      height: 56,
+      fontSize: 16,
+      backgroundColor: '#f5f5f5',
+      borderRadius: 12,
+      paddingHorizontal: 16,
+    },
+    darkInput: {
+      backgroundColor: '#2d2d2d',
+      color: '#fff',
+    },
+    removeButton: {
+      padding: 12,
+      borderRadius: 12,
+      backgroundColor: '#f5f5f5',
+    },
+    darkRemoveButton: {
+      backgroundColor: '#2d2d2d',
+    },
+    addButton: {
+      marginTop: 16,
+      borderColor: '#007AFF',
+      backgroundColor: 'transparent',
+      borderRadius: 16,
+      height: 56,
+      alignSelf: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    buttonContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    addIcon: {
+      marginRight: 8,
+      color: '#007AFF',
+    },
+    addButtonText: {
+      color: '#007AFF',
+      fontWeight: '600',
+    },
+    startButton: {
+      width: '100%',
+      height: 64,
+      backgroundColor: '#007AFF',
+      borderRadius: 16,
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    startButtonText: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: '#fff',
+      textAlign: 'center',
+    },
+  });
