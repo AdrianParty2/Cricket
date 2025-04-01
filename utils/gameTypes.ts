@@ -56,14 +56,19 @@ const calculateHitsForThrow = (type: 'singles' | 'doubles' | 'triples'): number 
   }
 };
 
+export const hasPlayerUnlockedAllNumbers = (player: Player): boolean => {
+  // Excluimos el número 0 (fuera) ya que no se bloquea
+  return VALID_NUMBERS.filter(num => num !== 0).every(num => player.numbers[num]?.isLocked);
+};
+
 export const updatePlayerScore = (
   player: Player,
   number: number,
   type: 'singles' | 'doubles' | 'triples',
   players: Player[]
-): Player => {
+): { player: Player; hasWon: boolean } => {
   // Si el número no es válido, se retorna el jugador sin cambios
-  if (!VALID_NUMBERS.includes(number)) return player;
+  if (!VALID_NUMBERS.includes(number)) return { player, hasWon: false };
 
   // Hacemos una copia para evitar mutaciones directas
   const newPlayer = { ...player };
@@ -107,5 +112,10 @@ export const updatePlayerScore = (
     newPlayer.numbers[number].points += points;
   }
 
-  return newPlayer;
+  // Verificamos si el jugador ha ganado
+  const hasUnlockedAll = hasPlayerUnlockedAllNumbers(newPlayer);
+  const maxScore = Math.max(...players.map(p => p.score));
+  const hasWon = hasUnlockedAll && newPlayer.score >= maxScore;
+
+  return { player: newPlayer, hasWon };
 };

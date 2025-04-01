@@ -102,13 +102,15 @@ export default function PartidaScreen({ route, navigation }) {
 
   const handleThrowType = (number: number, type: 'singles' | 'doubles' | 'triples') => {
     try {
-      const newPlayers = [...gameState.players];
-      newPlayers[gameState.currentPlayerIndex] = updatePlayerScore(
-        newPlayers[gameState.currentPlayerIndex],
+      const { player: updatedPlayer, hasWon } = updatePlayerScore(
+        gameState.players[gameState.currentPlayerIndex],
         number,
         type,
-        newPlayers
+        gameState.players
       );
+
+      const newPlayers = [...gameState.players];
+      newPlayers[gameState.currentPlayerIndex] = updatedPlayer;
 
       let newThrow = gameState.currentThrow + 1;
       let newPlayerIndex = gameState.currentPlayerIndex;
@@ -131,8 +133,27 @@ export default function PartidaScreen({ route, navigation }) {
         currentRound: newRound,
       });
 
-      if (newRound > 20) {
-        endGame();
+      if (hasWon) {
+        Alert.alert(
+          '¡Victoria!',
+          `${updatedPlayer.name} ha ganado la partida al desbloquear todos los números y tener la puntuación más alta.`,
+          [
+            {
+              text: 'Ver Resultados',
+              onPress: () => {
+                const winner = newPlayers.find(p => p.name === updatedPlayer.name);
+                if (winner) {
+                  navigation.navigate('Puntuacion', { winner });
+                }
+              }
+            }
+          ]
+        );
+      } else if (newRound > 20) {
+        const winner = newPlayers.reduce((prev, current) => 
+          (prev.score > current.score) ? prev : current
+        );
+        navigation.navigate('Puntuacion', { winner });
       }
     } catch (error) {
       console.error('Error en handleThrowType:', error);
@@ -140,12 +161,18 @@ export default function PartidaScreen({ route, navigation }) {
     }
   };
 
-  const endGame = () => {
-    const winner = gameState.players.reduce((prev, current) => 
-      (prev.score > current.score) ? prev : current
-    );
-
-    navigation.navigate('Puntuacion', { winner });
+  const endGame = (winner?: Player) => {
+    if (winner) {
+      const currentWinner = gameState.players.find(p => p.name === winner.name);
+      if (currentWinner) {
+        navigation.navigate('Puntuacion', { winner: currentWinner });
+      }
+    } else {
+      const winner = gameState.players.reduce((prev, current) => 
+        (prev.score > current.score) ? prev : current
+      );
+      navigation.navigate('Puntuacion', { winner });
+    }
   };
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, useColorScheme } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, useColorScheme, TextInput } from 'react-native';
 import { Button, ButtonText, Input, InputField } from "@gluestack-ui/themed";
 import { Plus, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { initializePlayer } from '../utils/gameTypes';
+import { lightTheme, darkTheme } from '../utils/theme';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -15,6 +16,8 @@ export default function HomeScreen() {
   const [playerNames, setPlayerNames] = useState<{ [key: string]: string }>({});
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = isDark ? darkTheme : lightTheme;
+  const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const handleAddPlayer = () => {
     setPlayers([...players, '']);
@@ -46,6 +49,20 @@ export default function HomeScreen() {
     }));
   };
 
+  const handleSubmitEditing = (index: number) => {
+    if (index === players.length - 1) {
+      // Si estamos en el último input, crear uno nuevo
+      handleAddPlayer();
+      // El nuevo input se creará en el siguiente render
+      setTimeout(() => {
+        inputRefs.current[players.length]?.focus();
+      }, 100);
+    } else {
+      // Si no estamos en el último, pasar al siguiente
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
   const handleStartGame = () => {
     const validPlayers = Object.values(playerNames).filter(name => name.trim() !== '');
     
@@ -66,17 +83,17 @@ export default function HomeScreen() {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.container, isDark && styles.darkContainer]}
+      style={[styles.container, { backgroundColor: theme.background }]}
     >
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
-          <Text style={[styles.title, isDark && styles.darkText]}>Cricket</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Cricket</Text>
           
           <View style={styles.playersContainer}>
-            <Text style={[styles.subtitle, isDark && styles.darkText]}>Jugadores</Text>
+            <Text style={[styles.subtitle, { color: theme.text }]}>Jugadores</Text>
             {players.map((_, index) => (
               <View key={index} style={styles.playerRow}>
                 <Input 
@@ -85,17 +102,23 @@ export default function HomeScreen() {
                   variant="outline"
                 >
                   <InputField
+                    ref={ref => inputRefs.current[index] = ref}
                     placeholder={`Jugador ${index + 1}`}
                     value={playerNames[`player${index}`] || ''}
                     onChangeText={(text) => handleNameChange(index, text)}
-                    style={[styles.input, isDark && styles.darkInput]}
-                    onSubmitEditing={handleAddPlayer}
+                    style={[styles.input, { 
+                      backgroundColor: theme.surface,
+                      color: theme.text,
+                    }]}
+                    placeholderTextColor={theme.textSecondary}
+                    onSubmitEditing={() => handleSubmitEditing(index)}
+                    returnKeyType="next"
                   />
                 </Input>
                 {players.length > 2 && (
                   <View
                     onTouchEnd={() => handleRemovePlayer(index)}
-                    style={[styles.removeButton, isDark && styles.darkRemoveButton]}
+                    style={[styles.removeButton, { backgroundColor: theme.surface }]}
                   >
                     <Trash2 size={24} color={isDark ? "#ff6b6b" : "#ef4444"} />
                   </View>
@@ -107,7 +130,10 @@ export default function HomeScreen() {
               size="lg"
               variant="outline"
               onPress={handleAddPlayer}
-              style={styles.addButton}
+              style={[styles.addButton, { 
+                backgroundColor: theme.surfaceSecondary,
+                borderColor: theme.border,
+              }]}
             >
               <View style={styles.buttonContent}>
                 <Plus size={20} style={styles.addIcon} />
@@ -133,10 +159,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  darkContainer: {
-    backgroundColor: '#1a1a1a',
   },
   scrollContent: {
     flexGrow: 1,
@@ -154,17 +176,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 40,
-    color: '#1a1a1a',
     letterSpacing: 1,
-  },
-  darkText: {
-    color: '#fff',
   },
   subtitle: {
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 20,
-    color: '#1a1a1a',
   },
   playersContainer: {
     width: '100%',
@@ -179,26 +196,15 @@ const styles = StyleSheet.create({
   input: {
     height: 56,
     fontSize: 16,
-    backgroundColor: '#f5f5f5',
     borderRadius: 12,
     paddingHorizontal: 16,
-  },
-  darkInput: {
-    backgroundColor: '#2d2d2d',
-    color: '#fff',
   },
   removeButton: {
     padding: 12,
     borderRadius: 12,
-    backgroundColor: '#f5f5f5',
-  },
-  darkRemoveButton: {
-    backgroundColor: '#2d2d2d',
   },
   addButton: {
     marginTop: 16,
-    borderColor: '#d1d5db',
-    backgroundColor: '#f3f4f6',
     borderRadius: 16,
     height: 56,
     width: '100%',
