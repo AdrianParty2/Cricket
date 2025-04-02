@@ -15,14 +15,109 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation';
 import { initializePlayer } from '../utils/gameTypes';
+import { useColorScheme } from 'react-native';
+import { lightTheme, darkTheme } from '../theme';
+import { Appearance } from 'react-native';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const [players, setPlayers] = useState<string[]>(['']);
   const [playerNames, setPlayerNames] = useState<{ [key: string]: string }>({});
   const inputRefs = useRef<(TextInput | null)[]>([]);
+
+  const colorScheme = useColorScheme();
+  console.log('Color scheme:', colorScheme);
+  const colorScheme2 = Appearance.getColorScheme();
+  console.log('Tema con Appearance:', colorScheme2);
+  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      padding: 20,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
+      maxWidth: 600,
+      width: '100%',
+      alignSelf: 'center',
+    },
+    title: {
+      fontSize: 40,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginBottom: 40,
+      letterSpacing: 1,
+      color: '#1a1a1a',
+    },
+    subtitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      marginBottom: 20,
+      color: '#1a1a1a',
+    },
+    playersContainer: {
+      width: '100%',
+      marginBottom: 40,
+    },
+    playerRow: {
+      flexDirection: 'row',
+      marginBottom: 16,
+      alignItems: 'center',
+      gap: 12,
+    },
+    input: {
+      borderColor: theme.border,
+      backgroundColor: theme.cardBackground,
+      color: theme.text,
+    },
+    removeButton: {
+      padding: 12,
+      borderRadius: 12,
+    },
+    addButton: {
+      marginTop: 16,
+      borderRadius: 16,
+      height: 56,
+      width: '100%',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: '#ddd',
+      backgroundColor: '#fff',
+    },
+    buttonContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    addButtonText: {
+      fontWeight: '600',
+      fontSize: 16,
+      color: '#007AFF',
+    },
+    startButton: {
+      width: '100%',
+      height: 56,
+      borderRadius: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#007AFF',
+    },
+    startButtonText: {
+      fontSize: 18,
+      fontWeight: '600',
+      textAlign: 'center',
+      color: '#fff',
+    },
+  })
 
   const handleAddPlayer = () => {
     setPlayers([...players, '']);
@@ -141,96 +236,4 @@ export default function HomeScreen() {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5FCFF',
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    maxWidth: 600,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  title: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 40,
-    letterSpacing: 1,
-    color: '#1a1a1a',
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 20,
-    color: '#1a1a1a',
-  },
-  playersContainer: {
-    width: '100%',
-    marginBottom: 40,
-  },
-  playerRow: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    alignItems: 'center',
-    gap: 12,
-  },
-  input: {
-    flex: 1,
-    height: 56,
-    fontSize: 16,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
-    color: '#1a1a1a',
-  },
-  removeButton: {
-    padding: 12,
-    borderRadius: 12,
-  },
-  addButton: {
-    marginTop: 16,
-    borderRadius: 16,
-    height: 56,
-    width: '100%',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  addButtonText: {
-    fontWeight: '600',
-    fontSize: 16,
-    color: '#007AFF',
-  },
-  startButton: {
-    width: '100%',
-    height: 56,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#007AFF',
-  },
-  startButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-    color: '#fff',
-  },
-});
+};
