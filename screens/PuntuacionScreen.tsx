@@ -1,13 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, useColorScheme, Animated } from 'react-native';
-import { Button, ButtonText } from "@gluestack-ui/themed";
-import { Player } from '../utils/gameTypes';
+import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { Trophy } from 'lucide-react-native';
 
 export default function PuntuacionScreen({ route, navigation }) {
   const { winner } = route.params;
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
   const [scale] = React.useState(new Animated.Value(1));
 
   React.useEffect(() => {
@@ -26,24 +22,25 @@ export default function PuntuacionScreen({ route, navigation }) {
   }, []);
 
   return (
-    <View style={[styles.container, isDark && styles.darkContainer]}>
-      <Animated.View style={[styles.winnerContainer, { transform: [{ scale }] }]}>
-        <Trophy size={64} color={isDark ? "#FFD700" : "#FFA500"} style={styles.trophyIcon} />
-        <Text style={[styles.title, isDark && styles.darkText]}>¡Fin de la Partida!</Text>
-        <Text style={[styles.winnerText, isDark && styles.darkText]}>Ganador:</Text>
-        <Text style={[styles.winnerName, isDark && styles.darkText]}>{winner.name}</Text>
-        <Text style={[styles.scoreText, isDark && styles.darkScoreText]}>Puntuación: {winner.score}</Text>
-      </Animated.View>
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Animated.View style={[styles.winnerContainer, { transform: [{ scale }] }]}>
+          <Trophy size={64} color="#FFD700" style={styles.trophyIcon} />
+          <Text style={styles.title}>¡Fin de la Partida!</Text>
+          <Text style={styles.winnerText}>Ganador:</Text>
+          <Text style={styles.winnerName}>{winner.name}</Text>
+          <Text style={styles.scoreText}>Puntuación: {winner.score}</Text>
+        </Animated.View>
 
-      <Button
-        size="lg"
-        variant="solid"
-        action="primary"
-        onPress={() => navigation.navigate('Home')}
-        style={styles.button}
-      >
-        <ButtonText style={styles.buttonText}>Nueva Partida</ButtonText>
-      </Button>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Home')}
+          style={styles.startButton}
+        >
+          <Text style={styles.startButtonText}>
+            Nueva Partida
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -51,19 +48,22 @@ export default function PuntuacionScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#F5FCFF',
-  },
-  darkContainer: {
-    backgroundColor: '#1a1a1a',
+    maxWidth: 600,
+    width: '100%',
+    alignSelf: 'center',
   },
   winnerContainer: {
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#1c1c1e',
     padding: 32,
-    borderRadius: 24,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
@@ -72,6 +72,8 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     width: '100%',
     maxWidth: 400,
+    borderWidth: 1,
+    borderColor: '#333',
   },
   trophyIcon: {
     marginBottom: 24,
@@ -80,47 +82,40 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 24,
-    color: '#1a1a1a',
+    color: '#fff',
     textAlign: 'center',
   },
   winnerText: {
     fontSize: 24,
     marginBottom: 16,
-    color: '#1a1a1a',
+    color: '#fff',
     textAlign: 'center',
   },
   winnerName: {
     fontSize: 36,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#1a1a1a',
+    color: '#fff',
     textAlign: 'center',
   },
   scoreText: {
     fontSize: 28,
-    color: '#007AFF',
+    color: '#0A84FF',
     textAlign: 'center',
   },
-  darkText: {
-    color: '#fff',
-  },
-  darkScoreText: {
-    color: '#64B5F6',
-  },
-  button: {
+  startButton: {
     width: '100%',
     maxWidth: 400,
-    height: 64,
+    height: 56,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0A84FF',
   },
-  buttonText: {
-    fontSize: 20,
+  startButtonText: {
+    fontSize: 18,
     fontWeight: '600',
     textAlign: 'center',
+    color: '#fff',
   },
-}); 
+});

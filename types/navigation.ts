@@ -1,6 +1,12 @@
-import { Player } from '../utils/gameTypes';
+import type { Player } from '../utils/gameTypes';
 
 export type RootStackParamList = {
   Home: undefined;
-  Partida: { players: Player[] };
+  Partida: {
+    players: Player[];
+  };
+  Puntuacion: {
+    winner: string;
+    score: number;
+  };
 }; 

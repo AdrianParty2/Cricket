@@ -1,12 +1,20 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, useColorScheme, TextInput } from 'react-native';
-import { Button, ButtonText, Input, InputField } from "@gluestack-ui/themed";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity, 
+  TextInput, 
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert 
+} from 'react-native';
 import { Plus, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/navigation';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../types/navigation';
 import { initializePlayer } from '../utils/gameTypes';
-import { lightTheme, darkTheme } from '../utils/theme';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -14,9 +22,6 @@ export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const [players, setPlayers] = useState<string[]>(['']);
   const [playerNames, setPlayerNames] = useState<{ [key: string]: string }>({});
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const theme = isDark ? darkTheme : lightTheme;
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const handleAddPlayer = () => {
@@ -24,21 +29,19 @@ export default function HomeScreen() {
   };
 
   const handleRemovePlayer = (index: number) => {
-    if (players.length <= 2) {
-      Alert.alert('Error', 'Debe haber al menos 2 jugadores');
-      return;
-    }
+    const newPlayers = players.filter((_, i) => i !== index);
     
-    const newPlayers = [...players];
-    newPlayers.splice(index, 1);
+    const newPlayerNames: { [key: string]: string } = {};
+    Object.entries(playerNames).forEach(([key, value]) => {
+      const playerIndex = parseInt(key.replace('player', ''));
+      if (playerIndex < index) {
+        newPlayerNames[key] = value;
+      } else if (playerIndex > index) {
+        newPlayerNames[`player${playerIndex - 1}`] = value;
+      }
+    });
+
     setPlayers(newPlayers);
-    
-    const newPlayerNames = { ...playerNames };
-    // Reajustar las keys para mantener la secuencia correcta
-    for (let i = index; i < players.length - 1; i++) {
-      newPlayerNames[`player${i}`] = newPlayerNames[`player${i + 1}`];
-    }
-    delete newPlayerNames[`player${players.length - 1}`];
     setPlayerNames(newPlayerNames);
   };
 
@@ -51,14 +54,11 @@ export default function HomeScreen() {
 
   const handleSubmitEditing = (index: number) => {
     if (index === players.length - 1) {
-      // Si estamos en el último input, crear uno nuevo
       handleAddPlayer();
-      // El nuevo input se creará en el siguiente render
       setTimeout(() => {
         inputRefs.current[players.length]?.focus();
       }, 100);
-    } else {
-      // Si no estamos en el último, pasar al siguiente
+    } else if (index < players.length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -71,11 +71,6 @@ export default function HomeScreen() {
       return;
     }
 
-    if (validPlayers.length !== new Set(validPlayers).size) {
-      Alert.alert('Error', 'No puede haber nombres duplicados');
-      return;
-    }
-
     const gamePlayers = validPlayers.map(name => initializePlayer(name));
     navigation.navigate('Partida', { players: gamePlayers });
   };
@@ -83,73 +78,65 @@ export default function HomeScreen() {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.container, { backgroundColor: theme.background }]}
+      style={styles.container}
     >
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
-          <Text style={[styles.title, { color: theme.text }]}>Cricket</Text>
-          
+          <Text style={styles.title}>Cricket</Text>
+
           <View style={styles.playersContainer}>
-            <Text style={[styles.subtitle, { color: theme.text }]}>Jugadores</Text>
+            <Text style={styles.subtitle}>Jugadores</Text>
             {players.map((_, index) => (
               <View key={index} style={styles.playerRow}>
-                <Input 
-                  flex={1}
-                  size="lg"
-                  variant="outline"
-                >
-                  <InputField
-                    ref={ref => inputRefs.current[index] = ref}
-                    placeholder={`Jugador ${index + 1}`}
-                    value={playerNames[`player${index}`] || ''}
-                    onChangeText={(text) => handleNameChange(index, text)}
-                    style={[styles.input, { 
-                      backgroundColor: theme.surface,
-                      color: theme.text,
-                    }]}
-                    placeholderTextColor={theme.textSecondary}
-                    onSubmitEditing={() => handleSubmitEditing(index)}
-                    returnKeyType="next"
-                  />
-                </Input>
-                {players.length > 2 && (
-                  <View
-                    onTouchEnd={() => handleRemovePlayer(index)}
-                    style={[styles.removeButton, { backgroundColor: theme.surface }]}
+                <TextInput
+                  ref={ref => inputRefs.current[index] = ref}
+                  style={styles.input}
+                  placeholder={`Jugador ${index + 1}`}
+                  placeholderTextColor="#666"
+                  value={playerNames[`player${index}`] || ''}
+                  onChangeText={(text) => handleNameChange(index, text)}
+                  onSubmitEditing={() => handleSubmitEditing(index)}
+                  returnKeyType="next"
+                />
+                {players.length > 1 && (
+                  <TouchableOpacity
+                    onPress={() => handleRemovePlayer(index)}
+                    style={styles.removeButton}
                   >
-                    <Trash2 size={24} color={isDark ? "#ff6b6b" : "#ef4444"} />
-                  </View>
+                    <Trash2 size={24} color="#ef4444" />
+                  </TouchableOpacity>
                 )}
               </View>
             ))}
-            
-            <Button
-              size="lg"
-              variant="outline"
+
+            <TouchableOpacity
               onPress={handleAddPlayer}
-              style={[styles.addButton, { 
-                backgroundColor: theme.surfaceSecondary,
-                borderColor: theme.border,
-              }]}
+              style={styles.addButton}
             >
               <View style={styles.buttonContent}>
-                <Plus size={20} style={styles.addIcon} />
-                <ButtonText style={styles.addButtonText}>Añadir Jugador</ButtonText>
+                <Plus size={20} color="#007AFF" />
+                <Text style={styles.addButtonText}>
+                  Añadir Jugador
+                </Text>
               </View>
-            </Button>
+            </TouchableOpacity>
           </View>
 
-          <Button
-            size="lg"
-            variant="solid"
+          <TouchableOpacity
             onPress={handleStartGame}
-            style={styles.startButton}
+            disabled={Object.values(playerNames).filter(name => name.trim()).length < 2}
+            style={[
+              styles.startButton,
+              { opacity: Object.values(playerNames).filter(name => name.trim()).length >= 2 ? 1 : 0.5 }
+            ]}
           >
-            <ButtonText style={styles.startButtonText}>Iniciar Partida</ButtonText>
-          </Button>
+            <Text style={styles.startButtonText}>
+              Comenzar Partida
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -159,6 +146,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
   },
   scrollContent: {
     flexGrow: 1,
@@ -177,11 +165,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 40,
     letterSpacing: 1,
+    color: '#fff',
   },
   subtitle: {
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 20,
+    color: '#fff',
   },
   playersContainer: {
     width: '100%',
@@ -194,10 +184,15 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   input: {
+    flex: 1,
     height: 56,
     fontSize: 16,
     borderRadius: 12,
     paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#333',
+    backgroundColor: '#1c1c1e',
+    color: '#fff',
   },
   removeButton: {
     padding: 12,
@@ -209,17 +204,9 @@ const styles = StyleSheet.create({
     height: 56,
     width: '100%',
     justifyContent: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+    borderWidth: 1,
+    borderColor: '#333',
+    backgroundColor: '#1c1c1e',
   },
   buttonContent: {
     flexDirection: 'row',
@@ -227,36 +214,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
-  addIcon: {
-    color: '#007AFF',
-  },
   addButtonText: {
-    color: '#007AFF',
     fontWeight: '600',
     fontSize: 16,
+    color: '#0A84FF',
   },
   startButton: {
     width: '100%',
     height: 56,
-    backgroundColor: '#007AFF',
     borderRadius: 16,
     justifyContent: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
+    alignItems: 'center',
+    backgroundColor: '#0A84FF',
   },
   startButtonText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
     textAlign: 'center',
+    color: '#fff',
   },
 });
