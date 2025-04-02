@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, ScrollView, TouchableOpacity, Animated, Dimensions } from 'react-native';
-import { Player, GameState, isNumberLocked, isNumberLockedForPlayer, updatePlayerScore } from '../utils/gameTypes';
+import { View, Text, StyleSheet, Alert, ScrollView, useColorScheme, Animated, Dimensions, TouchableOpacity } from 'react-native';
+import { Button, ButtonText } from "@gluestack-ui/themed";
+import { Player, GameState, initializePlayer, isNumberLocked, isNumberLockedForPlayer, updatePlayerScore } from '../utils/gameTypes';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../types/navigation';
@@ -8,8 +9,8 @@ import { X, Check } from 'lucide-react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const BUTTON_SIZE = Math.min(SCREEN_WIDTH * 0.25, 80);
-const LARGE_BUTTON_SIZE = Math.min(SCREEN_WIDTH * 0.35, 100);
+const BUTTON_SIZE = Math.min(SCREEN_WIDTH * 0.25, 80); // 25% del ancho de pantalla o máximo 80
+const LARGE_BUTTON_SIZE = Math.min(SCREEN_WIDTH * 0.35, 100); // 35% del ancho de pantalla o máximo 100
 
 const NUMEROS = [15, 16, 17, 18, 19, 20, 25];
 
@@ -20,6 +21,8 @@ export default function PartidaScreen() {
   const navigation = useNavigation<PartidaScreenNavigationProp>();
   const route = useRoute<PartidaScreenRouteProp>();
   const { players } = route.params;
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [buttonScale] = useState(new Animated.Value(1));
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const [gameState, setGameState] = useState<GameState>({
@@ -194,24 +197,26 @@ export default function PartidaScreen() {
     
     return (
       <Animated.View key={`button-${number}`} style={{ transform: [{ scale: buttonScale }] }}>
-        <TouchableOpacity
+        <Button
+          size="lg"
+          variant="solid"
+          action={isLocked ? "secondary" : isLockedForPlayer ? "warning" : "primary"}
           onPress={() => handleThrow(number)}
-          disabled={isLocked}
           style={[
             styles.numberButton,
             isLarge && styles.largeButton,
-            isLocked && styles.lockedButton,
-            isLockedForPlayer && !isLocked && styles.lockedForPlayerButton
+            isLocked && styles.lockedButton
           ]}
+          isDisabled={isLocked}
         >
-          <Text style={[
+          <ButtonText style={[
             styles.buttonText,
             isLarge && styles.largeButtonText,
             isLocked && styles.lockedButtonText
           ]}>
             {buttonText}
-          </Text>
-        </TouchableOpacity>
+          </ButtonText>
+        </Button>
       </Animated.View>
     );
   };
@@ -252,48 +257,51 @@ export default function PartidaScreen() {
   }, [gameEnded, gameState, navigation]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isDark && styles.darkContainer]}>
+      <View style={[styles.header, isDark && styles.darkHeader]}>
+        <Text style={[styles.roundText, isDark && styles.darkText]}>Ronda: {gameState.currentRound}/20</Text>
+        <Text style={[styles.playerText, isDark && styles.darkText]}>Jugador: <Text style={{fontWeight: 'bold'}}>{currentPlayer.name}</Text></Text>
+        <Text style={[styles.throwText, isDark && styles.darkText]}>Tirada: {gameState.currentThrow}/3</Text>
+      </View>
+
+      <View style={styles.buttonsContainer}>
+        <View style={styles.buttonRow}>
+          {[15, 16, 17].map(num => renderNumberButton(num))}
+        </View>
+
+        <View style={styles.buttonRow}>
+          {[18, 19, 20].map(num => renderNumberButton(num))}
+        </View>
+
+        <View style={styles.buttonRow}>
+          {renderNumberButton(25)}
+          {renderNumberButton(0, true)}
+        </View>
+      </View>
+
       <ScrollView 
-        contentContainerStyle={styles.scrollContent}
+        style={[styles.scoresContainer, isDark && styles.darkScoresContainer]}
+        contentContainerStyle={styles.scoresContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.content}>
-          <Text style={styles.title}>Cricket</Text>
-          
-          <View style={styles.header}>
-            <Text style={styles.subtitle}>Ronda: {gameState.currentRound}/20</Text>
-            <Text style={styles.playerText}>Jugador: <Text style={styles.playerName}>{currentPlayer.name}</Text></Text>
-            <Text style={styles.throwText}>Tirada: {gameState.currentThrow}/3</Text>
-          </View>
-
-          <View style={styles.buttonsContainer}>
-            <View style={styles.buttonRow}>
-              {[15, 16, 17].map(num => renderNumberButton(num))}
-            </View>
-
-            <View style={styles.buttonRow}>
-              {[18, 19, 20].map(num => renderNumberButton(num))}
-            </View>
-
-            <View style={styles.buttonRow}>
-              {renderNumberButton(25)}
-              {renderNumberButton(0, true)}
+        {gameState.players.map((player, index) => (
+          <View key={`player-${index}`} style={[
+            styles.playerScoreContainer,
+            isDark && styles.darkPlayerScoreContainer
+          ]}>
+            <Text style={[
+              styles.playerName,
+              isDark && styles.darkText
+            ]}>{player.name}</Text>
+            <Text style={[
+              styles.scoreText,
+              isDark && styles.darkScoreText
+            ]}>Puntos: {player.score}</Text>
+            <View style={styles.numbersStatus}>
+              {[15, 16, 17, 18, 19, 20, 25].map(num => renderNumberStatus(player, num))}
             </View>
           </View>
-
-          <View style={styles.scoresContainer}>
-            <Text style={styles.subtitle}>Puntuaciones</Text>
-            {gameState.players.map((player, index) => (
-              <View key={`player-${index}`} style={styles.playerScoreContainer}>
-                <Text style={styles.playerScoreText}>{player.name}</Text>
-                <Text style={styles.scoreText}>Puntos: {player.score}</Text>
-                <View style={styles.numbersStatus}>
-                  {[15, 16, 17, 18, 19, 20, 25].map(num => renderNumberStatus(player, num))}
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
+        ))}
       </ScrollView>
     </View>
   );
@@ -302,147 +310,160 @@ export default function PartidaScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    padding: SCREEN_WIDTH * 0.05, // 5% del ancho de la pantalla
+    backgroundColor: '#F5FCFF',
   },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    maxWidth: 600,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  title: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-    letterSpacing: 1,
-    color: '#fff',
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 20,
-    color: '#fff',
+  darkContainer: {
+    backgroundColor: '#1a1a1a',
   },
   header: {
-    width: '100%',
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: '#1c1c1e',
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#333',
+    marginBottom: SCREEN_HEIGHT * 0.02,
+    padding: SCREEN_WIDTH * 0.04,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  darkHeader: {
+    backgroundColor: '#2d2d2d',
+  },
+  roundText: {
+    fontSize: Math.min(SCREEN_WIDTH * 0.05, 20),
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#1a1a1a',
   },
   playerText: {
-    fontSize: 16,
+    fontSize: Math.min(SCREEN_WIDTH * 0.045, 18),
     marginBottom: 8,
-    color: '#fff',
-  },
-  playerName: {
-    fontWeight: 'bold',
+    color: '#1a1a1a',
   },
   throwText: {
-    fontSize: 16,
+    fontSize: Math.min(SCREEN_WIDTH * 0.045, 18),
+    marginBottom: 8,
+    color: '#1a1a1a',
+  },
+  darkText: {
     color: '#fff',
   },
   buttonsContainer: {
-    width: '100%',
-    marginBottom: 30,
+    marginBottom: SCREEN_HEIGHT * 0.02,
+    paddingHorizontal: SCREEN_WIDTH * 0.02,
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 16,
+    marginBottom: SCREEN_HEIGHT * 0.02,
     alignItems: 'center',
   },
   numberButton: {
     width: BUTTON_SIZE,
     height: BUTTON_SIZE,
-    borderRadius: 12,
-    backgroundColor: '#0A84FF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: BUTTON_SIZE * 0.2,
+    backgroundColor: '#007AFF',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   largeButton: {
     width: LARGE_BUTTON_SIZE,
     height: LARGE_BUTTON_SIZE,
   },
   lockedButton: {
-    backgroundColor: '#333',
     opacity: 0.7,
-  },
-  lockedForPlayerButton: {
-    backgroundColor: '#38761d',
+    backgroundColor: '#ccc',
   },
   buttonText: {
-    fontSize: 20,
+    fontSize: Math.min(SCREEN_WIDTH * 0.06, 24),
     fontWeight: 'bold',
     color: '#fff',
     textAlign: 'center',
+    textAlignVertical: 'center',
   },
   largeButtonText: {
-    fontSize: 24,
+    fontSize: Math.min(SCREEN_WIDTH * 0.07, 28),
   },
   lockedButtonText: {
     color: '#666',
   },
   scoresContainer: {
-    width: '100%',
-    marginBottom: 20,
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+    marginTop: SCREEN_HEIGHT * 0.02,
+  },
+  darkScoresContainer: {
+    backgroundColor: '#2d2d2d',
+  },
+  scoresContent: {
+    padding: SCREEN_WIDTH * 0.04,
   },
   playerScoreContainer: {
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#333',
-    backgroundColor: '#1c1c1e',
+    marginBottom: SCREEN_HEIGHT * 0.02,
+    padding: SCREEN_WIDTH * 0.04,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  playerScoreText: {
-    fontSize: 18,
+  darkPlayerScoreContainer: {
+    borderBottomColor: '#444',
+  },
+  playerName: {
+    fontSize: Math.min(SCREEN_WIDTH * 0.045, 18),
     fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#fff',
+    marginBottom: 4,
+    color: '#1a1a1a',
   },
   scoreText: {
-    fontSize: 16,
-    marginBottom: 12,
+    fontSize: Math.min(SCREEN_WIDTH * 0.04, 16),
+    color: '#666',
+    marginBottom: 8,
+  },
+  darkScoreText: {
     color: '#aaa',
   },
   numbersStatus: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: SCREEN_WIDTH * 0.02,
   },
   numberStatusContainer: {
-    backgroundColor: '#1c1c1e',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: SCREEN_WIDTH * 0.03,
+    paddingVertical: SCREEN_HEIGHT * 0.01,
     borderRadius: 8,
     marginRight: 4,
     marginBottom: 4,
-    borderWidth: 1,
-    borderColor: '#0A84FF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    minWidth: SCREEN_WIDTH * 0.2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   lockedNumberStatus: {
-    borderColor: '#38761d',
+    backgroundColor: '#E8F5E9',
   },
   numberStatusText: {
-    fontSize: 14,
-    color: '#0A84FF',
+    fontSize: Math.min(SCREEN_WIDTH * 0.035, 14),
+    color: '#1976D2',
     fontWeight: '500',
+    textAlign: 'center',
   },
   lockedNumberStatusText: {
-    color: '#38761d',
+    color: '#4CAF50',
   },
 });

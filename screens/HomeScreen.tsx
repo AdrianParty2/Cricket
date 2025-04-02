@@ -146,7 +146,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#F5FCFF',
   },
   scrollContent: {
     flexGrow: 1,
@@ -165,13 +165,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 40,
     letterSpacing: 1,
-    color: '#fff',
+    color: '#1a1a1a',
   },
   subtitle: {
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 20,
-    color: '#fff',
+    color: '#1a1a1a',
   },
   playersContainer: {
     width: '100%',
@@ -190,9 +190,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#333',
-    backgroundColor: '#1c1c1e',
-    color: '#fff',
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
+    color: '#1a1a1a',
   },
   removeButton: {
     padding: 12,
@@ -205,8 +205,8 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#333',
-    backgroundColor: '#1c1c1e',
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
   },
   buttonContent: {
     flexDirection: 'row',
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontWeight: '600',
     fontSize: 16,
-    color: '#0A84FF',
+    color: '#007AFF',
   },
   startButton: {
     width: '100%',
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0A84FF',
+    backgroundColor: '#007AFF',
   },
   startButtonText: {
     fontSize: 18,
